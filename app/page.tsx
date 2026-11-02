@@ -2,180 +2,91 @@
 
 import React, { useMemo, useState } from 'react';
 import { useDashboard } from '@/lib/context/DashboardContext';
-import { Navbar } from '@/components/Navbar';
-import { FinancialSection } from '@/components/FinancialSection';
-import { TaskSection } from '@/components/TaskSection';
-import { calculateFinancialSummary, calculateTaskSummary, formatVND } from '@/lib/utils/aggregation';
-import { TrendingUp, TrendingDown, Wallet, CheckCircle2 } from 'lucide-react';
+import { Navbar } from '@/components/dashboard/navbar';
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { ExpenseTracker } from '@/components/dashboard/expense-tracker';
+import { TaskManager } from '@/components/dashboard/task-manager';
+import { calculateFinancialSummary, calculateTaskSummary } from '@/lib/utils/aggregation';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function DashboardPage() {
   const { isHydrated, transactions, tasks } = useDashboard();
-  const [activeMobileTab, setActiveMobileTab] = useState<'FINANCE' | 'TASKS' | 'BOTH'>('BOTH');
+  const [activeMobileView, setActiveMobileView] = useState<'BOTH' | 'FINANCE' | 'TASKS'>('BOTH');
 
-  // Tính toán số liệu thống kê nghiệp vụ
+  // Thống kê nghiệp vụ
   const financialSummary = useMemo(() => calculateFinancialSummary(transactions), [transactions]);
   const taskSummary = useMemo(() => calculateTaskSummary(tasks), [tasks]);
 
-  // Loading skeleton trong lúc nạp từ LocalStorage
+  // Loading skeleton tối giản
   if (!isHydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="text-center space-y-3">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-            Đang tải dữ liệu bảng điều khiển...
-          </p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-900 border-t-transparent dark:border-zinc-100" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 transition-colors">
+    <div className="min-h-screen bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50 antialiased selection:bg-zinc-800 selection:text-zinc-100">
       {/* Header bar */}
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        {/* 4 Cards Thống kê Nghiệp vụ Tổng quan */}
-        <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Card 1: Tổng thu */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:shadow-md">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                Tổng Thu Nhập
-              </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                <TrendingUp className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
-              {formatVND(financialSummary.totalIncome)}
-            </div>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              {financialSummary.incomeCount} nguồn thu ghi nhận
-            </p>
-          </div>
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 space-y-8">
+        {/* 4 Stats Cards chuẩn phong cách shadcn/ui: Phẳng, nhỏ gọn, không subtext rườm rà */}
+        <StatsCards
+          totalIncome={financialSummary.totalIncome}
+          totalExpense={financialSummary.totalExpense}
+          netBalance={financialSummary.netBalance}
+          completedTasks={taskSummary.done}
+          totalTasks={taskSummary.total}
+        />
 
-          {/* Card 2: Tổng chi */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:shadow-md">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                Tổng Chi Tiêu
-              </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
-                <TrendingDown className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400">
-              {formatVND(financialSummary.totalExpense)}
-            </div>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              {financialSummary.expenseCount} khoản chi tiêu
-            </p>
-          </div>
-
-          {/* Card 3: Số dư khả dụng */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:shadow-md">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                Số Dư Khả Dụng
-              </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
-                <Wallet className="h-4 w-4" />
-              </div>
-            </div>
-            <div
-              className={`mt-3 text-2xl font-bold tracking-tight ${
-                financialSummary.netBalance >= 0
-                  ? 'text-indigo-600 dark:text-indigo-400'
-                  : 'text-amber-600 dark:text-amber-400'
-              }`}
-            >
-              {formatVND(financialSummary.netBalance)}
-            </div>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              Tỷ lệ tích lũy: {financialSummary.savingsRate}%
-            </p>
-          </div>
-
-          {/* Card 4: Task hoàn thành */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:shadow-md">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                Công Việc Hoàn Thành
-              </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold tracking-tight text-violet-600 dark:text-violet-400">
-              {taskSummary.done} / {taskSummary.total}
-            </div>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              Đạt {taskSummary.completionRate}% chỉ tiêu công việc
-            </p>
-          </div>
-        </section>
-
-        {/* Nút chuyển đổi Tab trên thiết bị di động */}
-        <div className="mb-6 flex lg:hidden items-center justify-center rounded-xl bg-zinc-200/60 p-1 dark:bg-zinc-800 text-xs font-semibold">
-          <button
-            onClick={() => setActiveMobileTab('BOTH')}
-            className={`flex-1 rounded-lg py-1.5 transition-all cursor-pointer ${
-              activeMobileTab === 'BOTH'
-                ? 'bg-white text-zinc-900 shadow dark:bg-zinc-700 dark:text-zinc-100'
-                : 'text-zinc-600 dark:text-zinc-400'
-            }`}
+        {/* Nút chuyển đổi giao diện trên Mobile */}
+        <div className="flex lg:hidden justify-center">
+          <Tabs
+            value={activeMobileView}
+            onValueChange={(val) => setActiveMobileView(val as 'BOTH' | 'FINANCE' | 'TASKS')}
+            className="w-full sm:w-auto"
           >
-            Tất cả (2 Cột)
-          </button>
-          <button
-            onClick={() => setActiveMobileTab('FINANCE')}
-            className={`flex-1 rounded-lg py-1.5 transition-all cursor-pointer ${
-              activeMobileTab === 'FINANCE'
-                ? 'bg-white text-zinc-900 shadow dark:bg-zinc-700 dark:text-zinc-100'
-                : 'text-zinc-600 dark:text-zinc-400'
-            }`}
-          >
-            Thu Chi
-          </button>
-          <button
-            onClick={() => setActiveMobileTab('TASKS')}
-            className={`flex-1 rounded-lg py-1.5 transition-all cursor-pointer ${
-              activeMobileTab === 'TASKS'
-                ? 'bg-white text-zinc-900 shadow dark:bg-zinc-700 dark:text-zinc-100'
-                : 'text-zinc-600 dark:text-zinc-400'
-            }`}
-          >
-            Công Việc
-          </button>
+            <TabsList className="grid w-full grid-cols-3 h-8">
+              <TabsTrigger value="BOTH" className="text-xs">
+                Tất cả (2 Cột)
+              </TabsTrigger>
+              <TabsTrigger value="FINANCE" className="text-xs">
+                Thu chi
+              </TabsTrigger>
+              <TabsTrigger value="TASKS" className="text-xs">
+                Công việc
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
-        {/* Bố cục 2 Cột chính: Thu chi & Công việc */}
+        {/* Bố cục 2 Cột chính phẳng tối giản */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 items-start">
-          {/* Cột 1: Quản lý Thu chi */}
+          {/* Cột 1: Quản lý Thu chi (Expense Tracker) */}
           <div
             className={`space-y-6 ${
-              activeMobileTab === 'TASKS' ? 'hidden lg:block' : 'block'
+              activeMobileView === 'TASKS' ? 'hidden lg:block' : 'block'
             }`}
           >
-            <FinancialSection showSummaryCards={false} />
+            <ExpenseTracker />
           </div>
 
-          {/* Cột 2: Quản lý Công việc */}
+          {/* Cột 2: Quản lý Công việc (Task Manager) */}
           <div
             className={`space-y-6 ${
-              activeMobileTab === 'FINANCE' ? 'hidden lg:block' : 'block'
+              activeMobileView === 'FINANCE' ? 'hidden lg:block' : 'block'
             }`}
           >
-            <TaskSection />
+            <TaskManager />
           </div>
         </div>
       </main>
 
-      {/* Footer chuẩn Production */}
-      <footer className="mt-16 border-t border-zinc-200 py-6 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-        <p>© 2026 Personal Dashboard. Giải pháp quản lý công việc và tài chính cá nhân hiệu quả.</p>
+      {/* Footer tối giản chuẩn shadcn/ui */}
+      <footer className="mt-20 border-t border-zinc-200 py-6 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-500">
+        <p>© 2026 Personal Dashboard. All rights reserved.</p>
       </footer>
     </div>
   );
