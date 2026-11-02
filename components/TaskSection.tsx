@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useDashboard } from '@/lib/context/DashboardContext';
-import { Task, TaskPriority, TaskStatus } from '@/lib/models/Task';
+import { TaskPriority, TaskStatus } from '@/lib/models/Task';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { sortTasks, TaskSortCriteria } from '@/lib/utils/sorting';
 import { calculateTaskSummary } from '@/lib/utils/aggregation';
@@ -12,30 +12,26 @@ import {
   Plus,
   Trash2,
   AlertTriangle,
-  Clock,
   Calendar,
   CheckCircle2,
   Circle,
   ArrowUpDown,
-  Filter,
-  ChevronDown,
   ChevronUp,
-  Sparkles,
 } from 'lucide-react';
 
 export const TaskSection: React.FC = () => {
   const { tasks, addTask, updateTaskStatus, toggleTaskComplete, deleteTask } = useDashboard();
 
-  // 1. Search with Debounce
+  // Search với debounce
   const [searchInput, setSearchInput] = useState<string>('');
   const debouncedSearch = useDebounce<string>(searchInput, 300);
 
-  // 2. Filters & Sorting
+  // Bộ lọc & Sắp xếp
   const [statusFilter, setStatusFilter] = useState<'ALL' | TaskStatus>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<'ALL' | TaskPriority>('ALL');
   const [sortBy, setSortBy] = useState<TaskSortCriteria>('PRIORITY_DESC');
 
-  // 3. Form thêm Task mới
+  // Form thêm Task mới
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -47,27 +43,24 @@ export const TaskSection: React.FC = () => {
   });
   const [formError, setFormError] = useState<string>('');
 
-  // 4. Thống kê Task metrics qua reduce - O(N)
+  // Thống kê Task metrics
   const metrics = useMemo(() => calculateTaskSummary(tasks), [tasks]);
 
-  // 5. Lọc danh sách công việc (Search Debounced + Status + Priority)
+  // Lọc danh sách công việc
   const filteredTasks = useMemo(() => {
     const query = debouncedSearch.toLowerCase().trim();
 
     return tasks.filter((task) => {
-      // Tìm kiếm theo Title và Description
       if (query) {
         const matchTitle = task.title.toLowerCase().includes(query);
         const matchDesc = task.description.toLowerCase().includes(query);
         if (!matchTitle && !matchDesc) return false;
       }
 
-      // Bộ lọc Status
       if (statusFilter !== 'ALL' && task.status !== statusFilter) {
         return false;
       }
 
-      // Bộ lọc Priority
       if (priorityFilter !== 'ALL' && task.priority !== priorityFilter) {
         return false;
       }
@@ -76,7 +69,7 @@ export const TaskSection: React.FC = () => {
     });
   }, [tasks, debouncedSearch, statusFilter, priorityFilter]);
 
-  // 6. Sắp xếp danh sách sử dụng Merge Sort O(N log N)
+  // Sắp xếp danh sách
   const sortedTasks = useMemo(() => {
     return sortTasks(filteredTasks, sortBy);
   }, [filteredTasks, sortBy]);
@@ -87,7 +80,7 @@ export const TaskSection: React.FC = () => {
     setFormError('');
 
     if (!title.trim()) {
-      setFormError('Tiêu đề công việc không được để trống (Encapsulation Validation).');
+      setFormError('Vui lòng nhập tiêu đề công việc.');
       return;
     }
 
@@ -99,7 +92,7 @@ export const TaskSection: React.FC = () => {
         dueDate,
       });
 
-      // Reset
+      // Reset form
       setTitle('');
       setDescription('');
       setIsFormOpen(false);
@@ -118,19 +111,19 @@ export const TaskSection: React.FC = () => {
       case 'HIGH':
         return (
           <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-            Cao (High)
+            Ưu tiên Cao
           </span>
         );
       case 'MEDIUM':
         return (
           <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-            Vừa (Medium)
+            Ưu tiên Vừa
           </span>
         );
       case 'LOW':
         return (
           <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            Thấp (Low)
+            Ưu tiên Thấp
           </span>
         );
     }
@@ -143,10 +136,10 @@ export const TaskSection: React.FC = () => {
         <div>
           <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-indigo-500" />
-            Quản lý Công việc (Tasks)
+            Danh Sách Công Việc
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            OOP Model <code className="font-mono text-indigo-600 dark:text-indigo-400">Task</code> • Merge Sort O(N log N) & Debounced Search
+            Theo dõi tiến độ, mức độ ưu tiên và thời hạn công việc
           </p>
         </div>
 
@@ -155,7 +148,7 @@ export const TaskSection: React.FC = () => {
           className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors cursor-pointer"
         >
           {isFormOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-          <span>{isFormOpen ? 'Đóng Form' : 'Thêm Task Mới'}</span>
+          <span>{isFormOpen ? 'Đóng Form' : 'Thêm Công Việc'}</span>
         </button>
       </div>
 
@@ -192,23 +185,19 @@ export const TaskSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Input with Debounce */}
+      {/* Ô tìm kiếm */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
         <input
           type="text"
-          placeholder="Tìm kiếm công việc (Debounce 300ms)..."
+          placeholder="Tìm kiếm công việc..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="w-full rounded-xl border border-zinc-200 bg-white py-2 pl-9 pr-24 text-xs text-zinc-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 shadow-sm"
         />
         {searchInput && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            {searchInput !== debouncedSearch ? (
-              <span className="text-[10px] text-indigo-500 animate-pulse">Đang tìm...</span>
-            ) : (
-              <span className="text-[10px] text-zinc-400">{filteredTasks.length} kết quả</span>
-            )}
+            <span className="text-[10px] text-zinc-400">{filteredTasks.length} kết quả</span>
             <button
               onClick={() => setSearchInput('')}
               className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-xs cursor-pointer"
@@ -223,13 +212,13 @@ export const TaskSection: React.FC = () => {
       {isFormOpen && (
         <form
           onSubmit={handleCreateTask}
-          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90 animate-fadeIn"
+          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90"
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Thêm Công Việc Mới (OOP Task Entity)
+              Thêm Công Việc Mới
             </h3>
-            <span className="text-[11px] text-zinc-400">Kiểm tra title rỗng qua Setter</span>
+            <span className="text-[11px] text-zinc-400">Nhập thông tin công việc cần làm</span>
           </div>
 
           {formError && (
@@ -245,7 +234,7 @@ export const TaskSection: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="VD: Ôn tập thuật toán Divide & Conquer..."
+                placeholder="VD: Soạn báo cáo tài chính, Chuẩn bị slide..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
@@ -258,7 +247,7 @@ export const TaskSection: React.FC = () => {
               </label>
               <textarea
                 rows={2}
-                placeholder="Ghi chú chi tiết mục tiêu cần đạt được..."
+                placeholder="Ghi chú nội dung hoặc mục tiêu cần hoàn thành..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
@@ -275,9 +264,9 @@ export const TaskSection: React.FC = () => {
                   onChange={(e) => setPriority(e.target.value as TaskPriority)}
                   className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 cursor-pointer"
                 >
-                  <option value="HIGH">Cao (HIGH)</option>
-                  <option value="MEDIUM">Vừa (MEDIUM)</option>
-                  <option value="LOW">Thấp (LOW)</option>
+                  <option value="HIGH">Ưu tiên Cao</option>
+                  <option value="MEDIUM">Ưu tiên Vừa</option>
+                  <option value="LOW">Ưu tiên Thấp</option>
                 </select>
               </div>
 
@@ -306,7 +295,7 @@ export const TaskSection: React.FC = () => {
                 type="submit"
                 className="rounded-lg bg-indigo-600 px-4 py-1.5 font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors cursor-pointer"
               >
-                Tạo Task
+                Tạo Công Việc
               </button>
             </div>
           </div>
@@ -348,7 +337,7 @@ export const TaskSection: React.FC = () => {
             onChange={(e) => setPriorityFilter(e.target.value as 'ALL' | TaskPriority)}
             className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700 outline-none focus:border-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 cursor-pointer"
           >
-            <option value="ALL">Mọi độ ưu tiên</option>
+            <option value="ALL">Mọi mức độ</option>
             <option value="HIGH">Ưu tiên Cao</option>
             <option value="MEDIUM">Ưu tiên Vừa</option>
             <option value="LOW">Ưu tiên Thấp</option>
@@ -362,8 +351,8 @@ export const TaskSection: React.FC = () => {
               onChange={(e) => setSortBy(e.target.value as TaskSortCriteria)}
               className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700 outline-none focus:border-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 cursor-pointer"
             >
-              <option value="PRIORITY_DESC">Ưu tiên (Cao → Thấp)</option>
-              <option value="DUE_DATE_ASC">Hạn chót (Gần nhất)</option>
+              <option value="PRIORITY_DESC">Ưu tiên cao nhất</option>
+              <option value="DUE_DATE_ASC">Hạn chót gần nhất</option>
               <option value="CREATED_DESC">Mới tạo gần đây</option>
               <option value="STATUS">Theo Trạng thái</option>
             </select>
@@ -395,7 +384,6 @@ export const TaskSection: React.FC = () => {
               >
                 {/* Bên trái: Checkbox + Chi tiết Task */}
                 <div className="flex items-start gap-3 min-w-0 flex-1">
-                  {/* Nút check toggle hoàn thành - Gọi phương thức OOP markAsCompleted() */}
                   <button
                     onClick={() => toggleTaskComplete(task.id)}
                     title={isDone ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu đã hoàn thành'}
@@ -421,11 +409,11 @@ export const TaskSection: React.FC = () => {
                       </h4>
                       {getPriorityBadge(task.priority)}
 
-                      {/* Overdue alert badge */}
+                      {/* Badge quá hạn */}
                       {overdue && (
                         <span className="inline-flex items-center gap-1 rounded-md bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950 dark:text-rose-300">
                           <AlertTriangle className="h-3 w-3" />
-                          Quá hạn (isOverdue)
+                          Quá hạn
                         </span>
                       )}
                     </div>
@@ -449,9 +437,9 @@ export const TaskSection: React.FC = () => {
                         onChange={(e) => updateTaskStatus(task.id, e.target.value as TaskStatus)}
                         className="rounded border border-zinc-200 bg-white px-1.5 py-0.5 text-[11px] font-medium text-zinc-700 outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 cursor-pointer"
                       >
-                        <option value="TODO">Cần làm (TODO)</option>
-                        <option value="IN_PROGRESS">Đang làm (IN_PROGRESS)</option>
-                        <option value="DONE">Đã xong (DONE)</option>
+                        <option value="TODO">Cần làm</option>
+                        <option value="IN_PROGRESS">Đang làm</option>
+                        <option value="DONE">Đã xong</option>
                       </select>
                     </div>
                   </div>

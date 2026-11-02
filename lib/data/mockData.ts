@@ -1,7 +1,7 @@
 import { TaskJSON } from '../models/Task';
 import { TransactionJSON } from '../models/Transaction';
 
-// Tạo mốc thời gian động tương đối so với ngày hiện tại để demo luôn mới
+// Tạo mốc thời gian động tương đối so với ngày hiện tại để dữ liệu luôn mới mẻ
 const now = new Date();
 const getRelativeDate = (offsetDays: number): string => {
   const d = new Date(now);
@@ -12,8 +12,8 @@ const getRelativeDate = (offsetDays: number): string => {
 export const INITIAL_TASKS: TaskJSON[] = [
   {
     id: 'task-1',
-    title: 'Ôn tập kiến thức OOP, TypeScript & thuật toán Sorting',
-    description: 'Nắm vững 4 tính chất OOP (Đóng gói, Kế thừa, Đa hình, Trừu tượng) và Merge Sort O(N log N).',
+    title: 'Lập kế hoạch quản lý chi tiêu và ngân sách tiết kiệm quý này',
+    description: 'Rà soát các khoản chi cố định, mục tiêu đầu tư cá nhân và tối ưu hóa chi phí sinh hoạt hàng tháng.',
     priority: 'HIGH',
     status: 'IN_PROGRESS',
     dueDate: getRelativeDate(1), // Ngày mai
@@ -22,8 +22,8 @@ export const INITIAL_TASKS: TaskJSON[] = [
   },
   {
     id: 'task-2',
-    title: 'Hoàn thiện dự án Personal Management Dashboard demo',
-    description: 'Xây dựng Clean Architecture với Next.js App Router, Tailwind CSS và Normalized State.',
+    title: 'Hoàn thiện slide báo cáo tổng kết tiến độ dự án',
+    description: 'Tổng hợp số liệu bàn giao, biểu đồ hiệu suất và các cột mốc đã hoàn thành đúng hạn.',
     priority: 'HIGH',
     status: 'DONE',
     dueDate: getRelativeDate(-1),
@@ -32,8 +32,8 @@ export const INITIAL_TASKS: TaskJSON[] = [
   },
   {
     id: 'task-3',
-    title: 'Chuẩn bị CV & Portfolio xin thực tập Frontend / Fullstack',
-    description: 'Cập nhật các dự án đã làm, link GitHub và kinh nghiệm công nghệ vào CV bản mới nhất.',
+    title: 'Nghiên cứu tài liệu kiến trúc kỹ thuật cho dự án mới',
+    description: 'Đánh giá các giải pháp công nghệ, giải pháp phân tán và các tiêu chuẩn bảo mật dữ liệu.',
     priority: 'HIGH',
     status: 'TODO',
     dueDate: getRelativeDate(2),
@@ -42,18 +42,18 @@ export const INITIAL_TASKS: TaskJSON[] = [
   },
   {
     id: 'task-4',
-    title: 'Nộp bài kiểm tra tiếng Anh đầu vào doanh nghiệp',
-    description: 'Thực hiện bài test TOEIC / Aptis online theo email nhà tuyển dụng gửi.',
+    title: 'Gia hạn hợp đồng thuê nhà và đóng phí dịch vụ chung cư',
+    description: 'Chuyển khoản thanh toán tiền phòng và phí ban quản lý theo thông báo của chủ nhà.',
     priority: 'LOW',
     status: 'TODO',
-    dueDate: getRelativeDate(-2), // Quá hạn để kiểm tra hàm task.isOverdue()
+    dueDate: getRelativeDate(-2), // Quá hạn để kiểm tra hiển thị trạng thái
     createdAt: getRelativeDate(-5),
     updatedAt: getRelativeDate(-5),
   },
   {
     id: 'task-5',
-    title: 'Tìm hiểu Next.js 15 App Router & Server Actions nâng cao',
-    description: 'Đọc kỹ tài liệu chính thức về Caching, Turbopack và cơ chế revalidateTag.',
+    title: 'Tham gia buổi hội thảo trực tuyến về phát triển sản phẩm công nghệ',
+    description: 'Lắng nghe chia sẻ từ các chuyên gia trong ngành về tối ưu hóa quy trình làm việc.',
     priority: 'MEDIUM',
     status: 'IN_PROGRESS',
     dueDate: getRelativeDate(4),
@@ -62,8 +62,8 @@ export const INITIAL_TASKS: TaskJSON[] = [
   },
   {
     id: 'task-6',
-    title: 'Luyện tập 5 bài LeetCode về Hash Map & Two Pointers',
-    description: 'Tập giải thích cách tối ưu thời gian O(1) của Hash Table so với O(N) của mảng tuyến tính.',
+    title: 'Đăng ký khóa học tiếng Anh giao tiếp và kỹ năng thuyết trình',
+    description: 'Luyện tập phát âm, phản xạ nghe nói và hoàn thành bài kiểm tra phân loại đầu vào.',
     priority: 'MEDIUM',
     status: 'TODO',
     dueDate: getRelativeDate(3),
@@ -75,8 +75,8 @@ export const INITIAL_TASKS: TaskJSON[] = [
 export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   {
     id: 'tx-1',
-    title: 'Nhận lương trợ cấp thực tập tháng trước',
-    amount: 6500000,
+    title: 'Lương chuyển khoản tháng vừa qua',
+    amount: 14500000,
     type: 'INCOME',
     category: 'Lương',
     createdAt: getRelativeDate(-10),
@@ -84,8 +84,8 @@ export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   },
   {
     id: 'tx-2',
-    title: 'Dự án Freelance thiết kế Landing Page',
-    amount: 3200000,
+    title: 'Thu nhập từ dự án Freelance thiết kế giao diện web',
+    amount: 5200000,
     type: 'INCOME',
     category: 'Freelance',
     createdAt: getRelativeDate(-6),
@@ -93,8 +93,8 @@ export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   },
   {
     id: 'tx-3',
-    title: 'Tiền thuê trọ & điện nước phòng trọ',
-    amount: 3000000,
+    title: 'Tiền thuê căn hộ và phí dịch vụ sinh hoạt',
+    amount: 4500000,
     type: 'EXPENSE',
     category: 'Nhà ở',
     createdAt: getRelativeDate(-5),
@@ -102,8 +102,8 @@ export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   },
   {
     id: 'tx-4',
-    title: 'Đi siêu thị mua thực phẩm & đồ ăn tuần',
-    amount: 850000,
+    title: 'Đi siêu thị mua sắm thực phẩm cho gia đình',
+    amount: 1250000,
     type: 'EXPENSE',
     category: 'Ăn uống',
     createdAt: getRelativeDate(-4),
@@ -111,8 +111,8 @@ export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   },
   {
     id: 'tx-5',
-    title: 'Mua khóa học TypeScript & System Design',
-    amount: 450000,
+    title: 'Mua sách chuyên ngành và tài liệu học tập',
+    amount: 420000,
     type: 'EXPENSE',
     category: 'Học tập',
     createdAt: getRelativeDate(-3),
@@ -120,8 +120,8 @@ export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   },
   {
     id: 'tx-6',
-    title: 'Cà phê họp nhóm đồ án tốt nghiệp',
-    amount: 110000,
+    title: 'Gặp gỡ bạn bè cuối tuần tại quán cà phê',
+    amount: 160000,
     type: 'EXPENSE',
     category: 'Ăn uống',
     createdAt: getRelativeDate(-2),
@@ -129,8 +129,8 @@ export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   },
   {
     id: 'tx-7',
-    title: 'Đổ xăng xe máy & thay dầu nhớt định kỳ',
-    amount: 220000,
+    title: 'Bảo dưỡng xe định kỳ và đổ xăng',
+    amount: 350000,
     type: 'EXPENSE',
     category: 'Di chuyển',
     createdAt: getRelativeDate(-1),
@@ -138,8 +138,8 @@ export const INITIAL_TRANSACTIONS: TransactionJSON[] = [
   },
   {
     id: 'tx-8',
-    title: 'Thưởng KPI hoàn thành đồ án đúng hạn',
-    amount: 1500000,
+    title: 'Thưởng KPI hoàn thành xuất sắc dự án quý',
+    amount: 2500000,
     type: 'INCOME',
     category: 'Thưởng',
     createdAt: getRelativeDate(0),

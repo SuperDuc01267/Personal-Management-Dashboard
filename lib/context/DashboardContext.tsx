@@ -36,8 +36,8 @@ interface DashboardContextType {
 }
 
 const STORAGE_KEYS = {
-  TASKS: 'pm_dashboard_tasks_v1',
-  TRANSACTIONS: 'pm_dashboard_tx_v1',
+  TASKS: 'pm_dashboard_tasks_v2',
+  TRANSACTIONS: 'pm_dashboard_tx_v2',
   DARK_MODE: 'pm_dashboard_dark_mode',
 };
 
@@ -277,3 +277,4 @@ export const useDashboard = (): DashboardContextType => {
   }
   return context;
 };
+

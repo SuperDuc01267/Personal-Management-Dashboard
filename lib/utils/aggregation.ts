@@ -152,3 +152,4 @@ export function formatVND(amount: number): string {
     currency: 'VND',
   }).format(amount);
 }
+

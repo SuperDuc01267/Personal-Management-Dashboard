@@ -15,7 +15,6 @@ import {
   Wallet,
   Plus,
   Trash2,
-  Filter,
   ArrowUpDown,
   ShoppingBag,
   Home,
@@ -24,7 +23,6 @@ import {
   Car,
   DollarSign,
   Gift,
-  HelpCircle,
   Tag,
   ChevronDown,
   ChevronUp,
@@ -43,7 +41,11 @@ const CATEGORIES = [
   'Khác',
 ];
 
-export const FinancialSection: React.FC = () => {
+interface FinancialSectionProps {
+  showSummaryCards?: boolean;
+}
+
+export const FinancialSection: React.FC<FinancialSectionProps> = ({ showSummaryCards = false }) => {
   const { transactions, addTransaction, deleteTransaction } = useDashboard();
 
   // State cục bộ cho Form thêm giao dịch
@@ -58,22 +60,22 @@ export const FinancialSection: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<'ALL' | TransactionType>('ALL');
   const [sortBy, setSortBy] = useState<TransactionSortCriteria>('DATE_DESC');
 
-  // 1. Thống kê tài chính bằng reduce - O(N)
+  // Thống kê tài chính
   const summary = useMemo(() => calculateFinancialSummary(transactions), [transactions]);
 
-  // 2. Nhóm chi tiêu theo danh mục
+  // Nhóm chi tiêu theo danh mục
   const categoryBreakdown = useMemo(
     () => groupExpensesByCategory(transactions),
     [transactions]
   );
 
-  // 3. Lọc danh sách giao dịch
+  // Lọc danh sách giao dịch
   const filteredTransactions = useMemo(() => {
     if (typeFilter === 'ALL') return transactions;
     return transactions.filter((tx) => tx.type === typeFilter);
   }, [transactions, typeFilter]);
 
-  // 4. Sắp xếp danh sách sử dụng thuật toán Merge Sort O(N log N)
+  // Sắp xếp danh sách
   const sortedTransactions = useMemo(() => {
     return sortTransactions(filteredTransactions, sortBy);
   }, [filteredTransactions, sortBy]);
@@ -89,7 +91,7 @@ export const FinancialSection: React.FC = () => {
       return;
     }
     if (isNaN(numAmount) || numAmount <= 0) {
-      setFormError('Số tiền phải là số hợp lệ và lớn hơn 0 (Kiểm tra Encapsulation).');
+      setFormError('Số tiền phải là số hợp lệ và lớn hơn 0.');
       return;
     }
 
@@ -145,10 +147,10 @@ export const FinancialSection: React.FC = () => {
         <div>
           <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
             <Wallet className="h-5 w-5 text-indigo-500" />
-            Tài chính & Thu chi
+            Quản lý Thu Chi
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Duyệt Single-pass O(N) với <code className="font-mono text-indigo-600 dark:text-indigo-400">reduce</code> & phân tích danh mục
+            Theo dõi dòng tiền, ghi chép thu chi và phân tích chi tiêu
           </p>
         </div>
 
@@ -162,70 +164,72 @@ export const FinancialSection: React.FC = () => {
         </button>
       </div>
 
-      {/* 3 Summary Cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {/* Tổng Thu */}
-        <div className="rounded-xl border border-emerald-200/60 bg-gradient-to-br from-emerald-500/10 to-transparent p-4 dark:border-emerald-900/50">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              Tổng Thu nhập
-            </span>
-            <div className="rounded-lg bg-emerald-500/20 p-1.5 text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="h-4 w-4" />
+      {/* 3 Summary Cards (nếu bật) */}
+      {showSummaryCards && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* Tổng Thu */}
+          <div className="rounded-xl border border-emerald-200/60 bg-gradient-to-br from-emerald-500/10 to-transparent p-4 dark:border-emerald-900/50">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                Tổng Thu nhập
+              </span>
+              <div className="rounded-lg bg-emerald-500/20 p-1.5 text-emerald-600 dark:text-emerald-400">
+                <TrendingUp className="h-4 w-4" />
+              </div>
             </div>
-          </div>
-          <div className="mt-2 text-xl font-bold tracking-tight text-emerald-700 dark:text-emerald-300">
-            {formatVND(summary.totalIncome)}
-          </div>
-          <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-            {summary.incomeCount} nguồn thu
-          </p>
-        </div>
-
-        {/* Tổng Chi */}
-        <div className="rounded-xl border border-rose-200/60 bg-gradient-to-br from-rose-500/10 to-transparent p-4 dark:border-rose-900/50">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-rose-700 dark:text-rose-400">
-              Tổng Chi tiêu
-            </span>
-            <div className="rounded-lg bg-rose-500/20 p-1.5 text-rose-600 dark:text-rose-400">
-              <TrendingDown className="h-4 w-4" />
+            <div className="mt-2 text-xl font-bold tracking-tight text-emerald-700 dark:text-emerald-300">
+              {formatVND(summary.totalIncome)}
             </div>
+            <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+              {summary.incomeCount} giao dịch thu
+            </p>
           </div>
-          <div className="mt-2 text-xl font-bold tracking-tight text-rose-700 dark:text-rose-300">
-            {formatVND(summary.totalExpense)}
-          </div>
-          <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-            {summary.expenseCount} khoản chi
-          </p>
-        </div>
 
-        {/* Số dư còn lại */}
-        <div className="rounded-xl border border-indigo-200/60 bg-gradient-to-br from-indigo-500/10 to-transparent p-4 dark:border-indigo-900/50">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-indigo-700 dark:text-indigo-400">
-              Số dư Hiện có
-            </span>
-            <div className="rounded-lg bg-indigo-500/20 p-1.5 text-indigo-600 dark:text-indigo-400">
-              <Wallet className="h-4 w-4" />
+          {/* Tổng Chi */}
+          <div className="rounded-xl border border-rose-200/60 bg-gradient-to-br from-rose-500/10 to-transparent p-4 dark:border-rose-900/50">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-rose-700 dark:text-rose-400">
+                Tổng Chi tiêu
+              </span>
+              <div className="rounded-lg bg-rose-500/20 p-1.5 text-rose-600 dark:text-rose-400">
+                <TrendingDown className="h-4 w-4" />
+              </div>
             </div>
+            <div className="mt-2 text-xl font-bold tracking-tight text-rose-700 dark:text-rose-300">
+              {formatVND(summary.totalExpense)}
+            </div>
+            <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+              {summary.expenseCount} giao dịch chi
+            </p>
           </div>
-          <div
-            className={`mt-2 text-xl font-bold tracking-tight ${
-              summary.netBalance >= 0
-                ? 'text-indigo-700 dark:text-indigo-300'
-                : 'text-amber-600 dark:text-amber-400'
-            }`}
-          >
-            {formatVND(summary.netBalance)}
-          </div>
-          <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-            Tỷ lệ tích lũy: <strong className="text-indigo-600 dark:text-indigo-300">{summary.savingsRate}%</strong>
-          </p>
-        </div>
-      </div>
 
-      {/* Phân tích cơ cấu chi tiêu theo Category (Thống kê trực quan) */}
+          {/* Số dư còn lại */}
+          <div className="rounded-xl border border-indigo-200/60 bg-gradient-to-br from-indigo-500/10 to-transparent p-4 dark:border-indigo-900/50">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-indigo-700 dark:text-indigo-400">
+                Số dư Khả dụng
+              </span>
+              <div className="rounded-lg bg-indigo-500/20 p-1.5 text-indigo-600 dark:text-indigo-400">
+                <Wallet className="h-4 w-4" />
+              </div>
+            </div>
+            <div
+              className={`mt-2 text-xl font-bold tracking-tight ${
+                summary.netBalance >= 0
+                  ? 'text-indigo-700 dark:text-indigo-300'
+                  : 'text-amber-600 dark:text-amber-400'
+              }`}
+            >
+              {formatVND(summary.netBalance)}
+            </div>
+            <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+              Tỷ lệ tích lũy: <strong className="text-indigo-600 dark:text-indigo-300">{summary.savingsRate}%</strong>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Phân tích cơ cấu chi tiêu theo Category */}
       {categoryBreakdown.length > 0 && (
         <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between mb-3">
@@ -233,7 +237,7 @@ export const FinancialSection: React.FC = () => {
               Cơ cấu Chi tiêu theo Danh mục
             </h3>
             <span className="text-[11px] text-zinc-400">
-              Tổng chi: {formatVND(summary.totalExpense)}
+              Tổng: {formatVND(summary.totalExpense)}
             </span>
           </div>
           <div className="space-y-2.5">
@@ -262,17 +266,17 @@ export const FinancialSection: React.FC = () => {
         </div>
       )}
 
-      {/* Form thêm giao dịch (Ẩn/Hiện) */}
+      {/* Form thêm giao dịch */}
       {isFormOpen && (
         <form
           onSubmit={handleSubmit}
-          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90 animate-fadeIn"
+          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90"
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Thêm Giao dịch Mới (Encapsulated Model)
+              Thêm Giao Dịch Mới
             </h3>
-            <span className="text-[11px] text-zinc-400">Kiểm tra validation amount &gt; 0</span>
+            <span className="text-[11px] text-zinc-400">Ghi lại khoản thu hoặc chi tiêu</span>
           </div>
 
           {formError && (
@@ -301,7 +305,7 @@ export const FinancialSection: React.FC = () => {
                   }`}
                 >
                   <TrendingUp className="h-3.5 w-3.5" />
-                  Thu nhập (Income)
+                  Thu nhập
                 </button>
                 <button
                   type="button"
@@ -316,7 +320,7 @@ export const FinancialSection: React.FC = () => {
                   }`}
                 >
                   <TrendingDown className="h-3.5 w-3.5" />
-                  Chi tiêu (Expense)
+                  Chi tiêu
                 </button>
               </div>
             </div>
@@ -328,7 +332,7 @@ export const FinancialSection: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="VD: Mua sách giải thuật, Đi chợ, ..."
+                placeholder="VD: Mua sách, Đi chợ, Tiền lương..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
@@ -370,7 +374,7 @@ export const FinancialSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Submit button */}
+            {/* Nút lưu */}
             <div className="flex justify-end gap-2 pt-1">
               <button
                 type="button"
@@ -392,7 +396,7 @@ export const FinancialSection: React.FC = () => {
 
       {/* Thanh Lọc & Sắp xếp */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 pb-3 dark:border-zinc-800">
-        {/* Filter buttons */}
+        {/* Bộ lọc loại giao dịch */}
         <div className="flex items-center gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800 text-xs font-medium">
           <button
             onClick={() => setTypeFilter('ALL')}
@@ -426,7 +430,7 @@ export const FinancialSection: React.FC = () => {
           </button>
         </div>
 
-        {/* Sort Selector */}
+        {/* Tùy chọn sắp xếp */}
         <div className="flex items-center gap-1.5 text-xs text-zinc-500">
           <ArrowUpDown className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Sắp xếp:</span>
@@ -435,10 +439,10 @@ export const FinancialSection: React.FC = () => {
             onChange={(e) => setSortBy(e.target.value as TransactionSortCriteria)}
             className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700 outline-none focus:border-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 cursor-pointer"
           >
-            <option value="DATE_DESC">Mới nhất trước</option>
-            <option value="DATE_ASC">Cũ nhất trước</option>
-            <option value="AMOUNT_DESC">Số tiền (Cao → Thấp)</option>
-            <option value="AMOUNT_ASC">Số tiền (Thấp → Cao)</option>
+            <option value="DATE_DESC">Mới nhất</option>
+            <option value="DATE_ASC">Cũ nhất</option>
+            <option value="AMOUNT_DESC">Số tiền giảm dần</option>
+            <option value="AMOUNT_ASC">Số tiền tăng dần</option>
           </select>
         </div>
       </div>
@@ -485,7 +489,7 @@ export const FinancialSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Bên phải: Số tiền formatted bằng OOP method + Nút Xóa */}
+              {/* Bên phải: Số tiền & Nút Xóa */}
               <div className="flex items-center gap-3">
                 <span
                   className={`font-mono text-sm font-bold ${

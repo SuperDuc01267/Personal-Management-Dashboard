@@ -3,8 +3,8 @@ import './globals.css';
 import { DashboardProvider } from '@/lib/context/DashboardContext';
 
 export const metadata: Metadata = {
-  title: 'Personal Management Dashboard | Demo Interview',
-  description: 'Quản lý Công việc & Thu chi cá nhân - Next.js App Router, Clean OOP, Normalized State & Data Algorithms',
+  title: 'Personal Dashboard | Quản lý Công việc & Tài chính Cá nhân',
+  description: 'Ứng dụng quản lý công việc và tài chính cá nhân đơn giản, hiện đại và hiệu quả.',
 };
 
 export default function RootLayout({
