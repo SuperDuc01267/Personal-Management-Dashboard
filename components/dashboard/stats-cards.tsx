@@ -76,3 +76,4 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
     </div>
   );
 };
+

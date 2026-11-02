@@ -368,3 +368,4 @@ export const ExpenseTracker: React.FC = () => {
     </div>
   );
 };
+
