@@ -20,25 +20,24 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Trash2, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, ChevronUp } from 'lucide-react';
 
-const CATEGORIES = [
-  'Lương',
-  'Thưởng',
-  'Freelance',
+const INCOME_CATEGORIES = ['Lương', 'Thưởng', 'Freelance', 'Đầu tư', 'Khác'];
+const EXPENSE_CATEGORIES = [
   'Ăn uống',
   'Nhà ở',
   'Học tập',
   'Di chuyển',
   'Giải trí',
   'Mua sắm',
+  'Hóa đơn',
   'Khác',
 ];
 
 export const ExpenseTracker: React.FC = () => {
   const { transactions, addTransaction, deleteTransaction } = useDashboard();
 
-  // State cục bộ cho Form
+  // Form State
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
@@ -46,9 +45,17 @@ export const ExpenseTracker: React.FC = () => {
   const [category, setCategory] = useState<string>('Ăn uống');
   const [formError, setFormError] = useState<string>('');
 
-  // Lọc & Sắp xếp
+  // Filter & Sort State
   const [activeTab, setActiveTab] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<TransactionSortCriteria>('DATE_DESC');
+
+  // Danh mục tương ứng theo loại giao dịch
+  const currentCategories = type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+
+  const handleTypeChange = (newType: TransactionType) => {
+    setType(newType);
+    setCategory(newType === 'INCOME' ? 'Lương' : 'Ăn uống');
+  };
 
   // Phân tích cơ cấu chi tiêu
   const categoryBreakdown = useMemo(
@@ -104,14 +111,14 @@ export const ExpenseTracker: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header & Add Button */}
-      <div className="flex items-center justify-between">
+      {/* Top Header & Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-            Quản lý thu chi
+            Quản lý Thu Chi & Giao Dịch
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Lịch sử giao dịch và phân bổ chi tiêu
+            Ghi chép giao dịch tài chính và theo dõi phân bổ ngân sách
           </p>
         </div>
 
@@ -121,83 +128,93 @@ export const ExpenseTracker: React.FC = () => {
           className="h-8 gap-1 text-xs"
         >
           {isFormOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-          <span>{isFormOpen ? 'Đóng' : 'Thêm giao dịch'}</span>
+          <span>{isFormOpen ? 'Đóng form' : 'Thêm giao dịch'}</span>
         </Button>
       </div>
 
-      {/* Form thêm giao dịch (shadcn Card) */}
+      {/* Form thêm giao dịch mới */}
       {isFormOpen && (
-        <Card>
+        <Card className="border-slate-300 dark:border-slate-700/80 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Thêm giao dịch mới</CardTitle>
+            <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Thêm giao dịch mới
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-3">
               {formError && (
-                <div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400">
+                <div className="rounded-md border border-red-300 bg-red-50 p-2 text-xs text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400">
                   {formError}
                 </div>
               )}
 
-              {/* Type toggle */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant={type === 'INCOME' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setType('INCOME');
-                    setCategory('Lương');
-                  }}
-                  className="h-8 text-xs"
-                >
-                  Thu nhập
-                </Button>
-                <Button
-                  type="button"
-                  variant={type === 'EXPENSE' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setType('EXPENSE');
-                    setCategory('Ăn uống');
-                  }}
-                  className="h-8 text-xs"
-                >
-                  Chi tiêu
-                </Button>
+              {/* Loại giao dịch */}
+              <div>
+                <label className="block mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Phân loại
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant={type === 'EXPENSE' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleTypeChange('EXPENSE')}
+                    className="h-8 text-xs border-slate-300 dark:border-slate-700"
+                  >
+                    Chi tiêu
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={type === 'INCOME' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleTypeChange('INCOME')}
+                    className="h-8 text-xs border-slate-300 dark:border-slate-700"
+                  >
+                    Thu nhập
+                  </Button>
+                </div>
               </div>
 
-              {/* Title */}
+              {/* Tên giao dịch */}
               <div>
+                <label className="block mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Tên giao dịch *
+                </label>
                 <Input
                   type="text"
-                  placeholder="Tên giao dịch (VD: Lương, Tiền phòng, Ăn uống...)"
+                  placeholder="VD: Tiền phòng, Đi chợ, Lương tháng..."
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="h-8 text-xs"
                 />
               </div>
 
-              {/* Amount & Category */}
+              {/* Số tiền & Danh mục */}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div>
+                  <label className="block mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                    Số tiền (VND) *
+                  </label>
                   <Input
                     type="number"
                     min="1000"
                     step="1000"
-                    placeholder="Số tiền (VND)"
+                    placeholder="VD: 500000"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     className="h-8 font-mono text-xs"
                   />
                 </div>
                 <div>
+                  <label className="block mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                    Danh mục {type === 'INCOME' ? 'thu' : 'chi'}
+                  </label>
                   <Select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="h-8 text-xs"
                   >
-                    {CATEGORIES.map((cat) => (
+                    {currentCategories.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
                       </option>
@@ -206,7 +223,7 @@ export const ExpenseTracker: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-1">
+              <div className="flex justify-end gap-2 pt-2">
                 <Button
                   type="button"
                   variant="ghost"
@@ -225,120 +242,139 @@ export const ExpenseTracker: React.FC = () => {
         </Card>
       )}
 
-      {/* Bảng Cơ cấu chi tiêu (Table phẳng shadcn với thanh progress bg-zinc-800) */}
-      {categoryBreakdown.length > 0 && (
-        <Card>
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              Cơ cấu chi tiêu
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
+      {/* Bảng Cơ cấu chi tiêu (Table chuẩn, Progress thanh mảnh xám nhạt bg-slate-800) */}
+      <Card className="border-slate-300 dark:border-slate-700/80 shadow-sm overflow-hidden">
+        <CardHeader className="p-4 border-b border-slate-300 dark:border-slate-800">
+          <CardTitle className="text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+            Cơ cấu chi tiêu theo danh mục
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {categoryBreakdown.length === 0 ? (
+            <div className="p-6 text-center text-xs text-zinc-400">
+              Chưa có dữ liệu chi tiêu để phân tích.
+            </div>
+          ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[120px]">Danh mục</TableHead>
-                  <TableHead>Tỷ trọng</TableHead>
-                  <TableHead className="text-right">Số tiền</TableHead>
+                <TableRow className="border-b border-slate-300 dark:border-slate-700 bg-slate-50/70 dark:bg-zinc-900/60">
+                  <TableHead className="w-[140px] font-semibold text-zinc-700 dark:text-zinc-300">Danh mục</TableHead>
+                  <TableHead className="font-semibold text-zinc-700 dark:text-zinc-300">Tỷ trọng chi phí</TableHead>
+                  <TableHead className="text-right w-[140px] font-semibold text-zinc-700 dark:text-zinc-300">Số tiền</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categoryBreakdown.slice(0, 5).map((item) => (
-                  <TableRow key={item.category}>
+                {categoryBreakdown.map((item) => (
+                  <TableRow key={item.category} className="border-b border-slate-200 dark:border-slate-800/80">
                     <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
                       {item.category}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 max-w-md">
                         <Progress
                           value={item.percentage}
-                          className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800"
-                          indicatorClassName="bg-zinc-700 dark:bg-zinc-300"
+                          className="h-1.5 w-full bg-slate-200 dark:bg-slate-800"
+                          indicatorClassName="bg-slate-800 dark:bg-slate-200"
                         />
-                        <span className="w-8 text-right font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+                        <span className="w-9 text-right font-mono text-[11px] text-zinc-600 dark:text-zinc-400">
                           {item.percentage}%
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-mono text-zinc-700 dark:text-zinc-300">
+                    <TableCell className="text-right font-mono text-zinc-800 dark:text-zinc-200">
                       {formatVND(item.totalAmount)}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Danh sách giao dịch: Tabs & Sort */}
+      {/* Bảng Lịch sử Giao dịch */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* shadcn Tabs for filter */}
+          {/* Tabs Filter */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-            <TabsList className="h-8">
-              <TabsTrigger value="ALL" className="h-6 px-2.5 text-xs">
+            <TabsList className="h-8 border-slate-300 dark:border-slate-700">
+              <TabsTrigger value="ALL" className="h-6 px-3 text-xs">
                 Tất cả ({transactions.length})
               </TabsTrigger>
-              <TabsTrigger value="INCOME" className="h-6 px-2.5 text-xs">
+              <TabsTrigger value="INCOME" className="h-6 px-3 text-xs">
                 Thu nhập
               </TabsTrigger>
-              <TabsTrigger value="EXPENSE" className="h-6 px-2.5 text-xs">
+              <TabsTrigger value="EXPENSE" className="h-6 px-3 text-xs">
                 Chi tiêu
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
           {/* Sắp xếp */}
-          <div className="w-[160px]">
+          <div className="w-[170px]">
             <Select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as TransactionSortCriteria)}
-              className="h-8 text-xs"
+              className="h-8 text-xs border-slate-300 dark:border-slate-700"
             >
-              <option value="DATE_DESC">Mới nhất</option>
-              <option value="DATE_ASC">Cũ nhất</option>
+              <option value="DATE_DESC">Mới nhất trước</option>
+              <option value="DATE_ASC">Cũ nhất trước</option>
               <option value="AMOUNT_DESC">Số tiền giảm dần</option>
               <option value="AMOUNT_ASC">Số tiền tăng dần</option>
             </Select>
           </div>
         </div>
 
-        {/* Transaction Table / List */}
-        <Card className="p-0 overflow-hidden">
+        {/* Table danh sách: Không có floating elements, layout bảng chuẩn */}
+        <Card className="border-slate-300 dark:border-slate-700/80 shadow-sm overflow-hidden">
           {sortedTransactions.length === 0 ? (
             <div className="p-8 text-center text-xs text-zinc-400">
-              Không có giao dịch nào phù hợp.
+              Không tìm thấy giao dịch nào phù hợp bộ lọc.
             </div>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Nội dung</TableHead>
-                  <TableHead className="w-[100px]">Phân loại</TableHead>
-                  <TableHead className="text-right w-[140px]">Số tiền</TableHead>
-                  <TableHead className="w-[40px]"></TableHead>
+                <TableRow className="border-b border-slate-300 dark:border-slate-700 bg-slate-50/70 dark:bg-zinc-900/60">
+                  <TableHead className="font-semibold text-zinc-700 dark:text-zinc-300">Giao dịch</TableHead>
+                  <TableHead className="w-[120px] font-semibold text-zinc-700 dark:text-zinc-300">Danh mục</TableHead>
+                  <TableHead className="w-[100px] font-semibold text-zinc-700 dark:text-zinc-300">Phân loại</TableHead>
+                  <TableHead className="text-right w-[150px] font-semibold text-zinc-700 dark:text-zinc-300">Số tiền</TableHead>
+                  <TableHead className="w-[50px] text-center font-semibold text-zinc-700 dark:text-zinc-300">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedTransactions.map((tx) => (
-                  <TableRow key={tx.id} className="group">
+                  <TableRow
+                    key={tx.id}
+                    className="border-b border-slate-200 dark:border-slate-800/80 group"
+                  >
                     <TableCell>
                       <div className="font-medium text-zinc-900 dark:text-zinc-100">
                         {tx.title}
                       </div>
-                      <div className="text-[11px] text-zinc-400">
+                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
                         {new Date(tx.createdAt).toLocaleDateString('vi-VN')}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-[10px] font-normal">
+                      <Badge variant="outline" className="text-[11px] font-normal border-slate-300 dark:border-slate-700">
                         {tx.category}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      {tx.type === 'INCOME' ? (
+                        <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                          Thu nhập
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                          Chi tiêu
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <span
-                        className={`font-mono text-xs font-semibold ${
+                        className={`font-mono text-xs font-bold ${
                           tx.type === 'INCOME'
                             ? 'text-emerald-600 dark:text-emerald-400'
                             : 'text-zinc-900 dark:text-zinc-100'
@@ -347,12 +383,12 @@ export const ExpenseTracker: React.FC = () => {
                         {tx.getFormattedAmount(true)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right p-2">
+                    <TableCell className="text-center">
                       <Button
                         variant="ghost"
-                        size="iconSm"
+                        size="icon-xs"
                         onClick={() => deleteTransaction(tx.id)}
-                        className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity"
+                        className="text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
                         title="Xóa giao dịch"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -368,4 +404,3 @@ export const ExpenseTracker: React.FC = () => {
     </div>
   );
 };
-

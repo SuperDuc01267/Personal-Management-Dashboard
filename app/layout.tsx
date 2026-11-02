@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { DashboardProvider } from '@/lib/context/DashboardContext';
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: 'Personal Dashboard | Quản lý Công việc & Tài chính Cá nhân',
@@ -13,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <body className="min-h-screen antialiased">
         <DashboardProvider>
           {children}

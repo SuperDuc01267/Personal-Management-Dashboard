@@ -23,57 +23,56 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* 1. Tổng thu nhập */}
-      <Card className="p-5">
-        <div className="flex items-center justify-between pb-2">
+      <Card className="p-4 border-slate-300 dark:border-slate-700/80 shadow-sm">
+        <div className="flex items-center justify-between pb-1.5">
           <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
             Tổng thu nhập
           </span>
-          <TrendingUp className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
         </div>
-        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           {formatVND(totalIncome)}
         </div>
       </Card>
 
       {/* 2. Tổng chi tiêu */}
-      <Card className="p-5">
-        <div className="flex items-center justify-between pb-2">
+      <Card className="p-4 border-slate-300 dark:border-slate-700/80 shadow-sm">
+        <div className="flex items-center justify-between pb-1.5">
           <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
             Tổng chi tiêu
           </span>
-          <TrendingDown className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <TrendingDown className="h-4 w-4 text-rose-600 dark:text-rose-400" />
         </div>
-        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           {formatVND(totalExpense)}
         </div>
       </Card>
 
       {/* 3. Số dư khả dụng */}
-      <Card className="p-5">
-        <div className="flex items-center justify-between pb-2">
+      <Card className="p-4 border-slate-300 dark:border-slate-700/80 shadow-sm">
+        <div className="flex items-center justify-between pb-1.5">
           <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
             Số dư khả dụng
           </span>
-          <Wallet className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <Wallet className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
         </div>
-        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           {formatVND(netBalance)}
         </div>
       </Card>
 
       {/* 4. Công việc hoàn thành */}
-      <Card className="p-5">
-        <div className="flex items-center justify-between pb-2">
+      <Card className="p-4 border-slate-300 dark:border-slate-700/80 shadow-sm">
+        <div className="flex items-center justify-between pb-1.5">
           <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
             Công việc hoàn thành
           </span>
-          <CheckCircle2 className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <CheckCircle2 className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
         </div>
-        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           {completedTasks} / {totalTasks}
         </div>
       </Card>
     </div>
   );
 };
-
