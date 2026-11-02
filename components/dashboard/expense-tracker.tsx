@@ -5,6 +5,7 @@ import { useDashboard } from '@/lib/context/DashboardContext';
 import { TransactionType } from '@/lib/models/Transaction';
 import { groupExpensesByCategory, formatVND } from '@/lib/utils/aggregation';
 import { sortTransactions, TransactionSortCriteria } from '@/lib/utils/sorting';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,7 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Trash2, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, Search } from 'lucide-react';
 
 const INCOME_CATEGORIES = ['Lương', 'Thưởng', 'Freelance', 'Đầu tư', 'Khác'];
 const EXPENSE_CATEGORIES = [
@@ -45,6 +46,10 @@ export const ExpenseTracker: React.FC = () => {
   const [category, setCategory] = useState<string>('Ăn uống');
   const [formError, setFormError] = useState<string>('');
 
+  // Search State with Debounce (hỗ trợ tìm kiếm cả số tiền và nội dung)
+  const [searchInput, setSearchInput] = useState<string>('');
+  const debouncedSearch = useDebounce<string>(searchInput, 300);
+
   // Filter & Sort State
   const [activeTab, setActiveTab] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<TransactionSortCriteria>('DATE_DESC');
@@ -63,11 +68,35 @@ export const ExpenseTracker: React.FC = () => {
     [transactions]
   );
 
-  // Lọc danh sách giao dịch
+  // Lọc danh sách giao dịch (theo Tab + Tìm kiếm tên, danh mục hoặc số tiền)
   const filteredTransactions = useMemo(() => {
-    if (activeTab === 'ALL') return transactions;
-    return transactions.filter((tx) => tx.type === activeTab);
-  }, [transactions, activeTab]);
+    const cleanQuery = debouncedSearch.toLowerCase().trim();
+    // Tách các chữ số thuần túy nếu người dùng gõ số tiền có dấu chấm/phẩy (VD: "500.000" -> "500000")
+    const numericQuery = cleanQuery.replace(/[.,\s₫đ]/g, '');
+
+    return transactions.filter((tx) => {
+      // 1. Lọc theo Tab (Tất cả / Thu nhập / Chi tiêu)
+      if (activeTab !== 'ALL' && tx.type !== activeTab) {
+        return false;
+      }
+
+      // 2. Tìm kiếm theo Từ khóa (Tên, Danh mục hoặc Số tiền đã thêm)
+      if (cleanQuery) {
+        const matchTitle = tx.title.toLowerCase().includes(cleanQuery);
+        const matchCategory = tx.category.toLowerCase().includes(cleanQuery);
+        // Tìm kiếm theo số tiền thô (VD: người dùng gõ "500" hoặc "1250000")
+        const matchRawAmount = numericQuery.length > 0 && tx.amount.toString().includes(numericQuery);
+        // Tìm kiếm theo chuỗi tiền tệ định dạng VND (VD: người dùng gõ "500.000")
+        const matchFormattedAmount = tx.getFormattedAmount(false).toLowerCase().includes(cleanQuery);
+
+        if (!matchTitle && !matchCategory && !matchRawAmount && !matchFormattedAmount) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [transactions, activeTab, debouncedSearch]);
 
   // Sắp xếp danh sách
   const sortedTransactions = useMemo(() => {
@@ -294,12 +323,33 @@ export const ExpenseTracker: React.FC = () => {
 
       {/* Bảng Lịch sử Giao dịch */}
       <div className="space-y-3">
+        {/* Ô Tìm Kiếm Giao Dịch (Bao gồm cả Số tiền, Tên, Danh mục) */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+          <Input
+            type="text"
+            placeholder="Tìm kiếm giao dịch theo số tiền (VD: 500000, 1.250.000), tên hoặc danh mục..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-8 pl-8 pr-8 text-xs border-slate-300 dark:border-slate-700"
+          />
+          {searchInput && (
+            <button
+              onClick={() => setSearchInput('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Thanh Lọc Tabs & Sắp Xếp */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           {/* Tabs Filter */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
             <TabsList className="h-8 border-slate-300 dark:border-slate-700">
               <TabsTrigger value="ALL" className="h-6 px-3 text-xs">
-                Tất cả ({transactions.length})
+                Tất cả ({filteredTransactions.length})
               </TabsTrigger>
               <TabsTrigger value="INCOME" className="h-6 px-3 text-xs">
                 Thu nhập
@@ -325,11 +375,11 @@ export const ExpenseTracker: React.FC = () => {
           </div>
         </div>
 
-        {/* Table danh sách: Không có floating elements, layout bảng chuẩn */}
+        {/* Table danh sách giao dịch: Không có floating elements, layout bảng chuẩn */}
         <Card className="border-slate-300 dark:border-slate-700/80 shadow-sm overflow-hidden">
           {sortedTransactions.length === 0 ? (
             <div className="p-8 text-center text-xs text-zinc-400">
-              Không tìm thấy giao dịch nào phù hợp bộ lọc.
+              Không tìm thấy giao dịch nào phù hợp với từ khóa hoặc bộ lọc.
             </div>
           ) : (
             <Table>

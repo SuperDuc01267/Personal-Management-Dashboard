@@ -21,9 +21,7 @@ import {
   CheckSquare,
   Sun,
   Moon,
-  RotateCcw,
   Sparkles,
-  Check,
 } from 'lucide-react';
 
 export type DashboardView = 'overview' | 'expenses' | 'tasks';
@@ -34,14 +32,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ currentView, onViewChange }: AppSidebarProps) {
-  const { isDarkMode, toggleDarkMode, resetToMockData } = useDashboard();
-  const [resetDone, setResetDone] = React.useState<boolean>(false);
-
-  const handleReset = () => {
-    resetToMockData();
-    setResetDone(true);
-    setTimeout(() => setResetDone(false), 2000);
-  };
+  const { isDarkMode, toggleDarkMode } = useDashboard();
 
   const navItems = [
     {
@@ -117,29 +108,8 @@ export function AppSidebar({ currentView, onViewChange }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer Actions: Dark mode + Reset data */}
-      <SidebarFooter className="border-t border-slate-300 dark:border-slate-800 p-3 space-y-2">
-        {/* Reset Data Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReset}
-          className="w-full justify-start gap-2 h-8 text-xs font-normal border-slate-300 dark:border-slate-700 text-zinc-700 dark:text-zinc-300"
-        >
-          {resetDone ? (
-            <>
-              <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Đã đặt lại dữ liệu</span>
-            </>
-          ) : (
-            <>
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span>Đặt lại dữ liệu mẫu</span>
-            </>
-          )}
-        </Button>
-
-        {/* Theme Toggle Button */}
+      {/* Footer: Theme Toggle Button */}
+      <SidebarFooter className="border-t border-slate-300 dark:border-slate-800 p-3">
         <Button
           variant="ghost"
           size="sm"
@@ -162,4 +132,3 @@ export function AppSidebar({ currentView, onViewChange }: AppSidebarProps) {
     </Sidebar>
   );
 }
-
